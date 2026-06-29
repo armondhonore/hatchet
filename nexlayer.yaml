@@ -5,28 +5,27 @@ application:
     image: ghcr.io/hatchet-dev/hatchet/hatchet-lite:latest
     path: /
     servicePorts:
-    - 8080
+    - 8888
     vars:
-      DATABASE_URL: "postgresql://hatchet:hatchet@postgres.pod:5432/hatchet"
-      SERVER_TASKQUEUE_RABBITMQ_URL: "amqp://guest:guest@rabbitmq.pod:5672"
+      DATABASE_URL: "postgresql://hatchet:${POSTGRES_PASSWORD}@hatchet-postgres.pod:5432/hatchet?sslmode=disable"
+      SERVER_MSGQUEUE_KIND: "postgres"
       SERVER_URL: "https://relaxed-weasel-hatchet.cloud.nexlayer.ai"
       SERVER_AUTH_COOKIE_DOMAIN: "relaxed-weasel-hatchet.cloud.nexlayer.ai"
-      SERVER_AUTH_COOKIE_INSECURE: "false"
-      SERVER_ENCRYPTION_JWT_PRIVATE_KEY: "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2"
-      SERVER_ENCRYPTION_JWT_PUBLIC_KEY: "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2"
-      SERVER_ENCRYPTION_MASTER_KEYSET: "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4"
-    volumes:
-    - name: hatchet-certs
-      mountPath: /hatchet/certs
-      size: 1Gi
-  - name: postgres
-    image: postgres:16-alpine
+      SERVER_AUTH_COOKIE_INSECURE: "f"
+      SERVER_GRPC_BIND_ADDRESS: "0.0.0.0"
+      SERVER_GRPC_INSECURE: "t"
+      SERVER_GRPC_BROADCAST_ADDRESS: "relaxed-weasel-hatchet.cloud.nexlayer.ai:443"
+      SERVER_GRPC_PORT: "7077"
+      SERVER_AUTH_SET_EMAIL_VERIFIED: "t"
+      SERVER_DEFAULT_ENGINE_VERSION: "V1"
+  - name: hatchet-postgres
+    image: mirror.gcr.io/library/postgres:16-alpine
     servicePorts:
     - 5432
     vars:
       POSTGRES_DB: hatchet
       POSTGRES_USER: hatchet
-      POSTGRES_PASSWORD: hatchet
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
     - name: hatchet-db
       mountPath: /var/lib/postgresql/data
